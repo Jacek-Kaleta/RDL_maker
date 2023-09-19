@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="RDL_maker.css"> 
+	<title>RDL CREATOR</title>
+</head>
+<body>
+	<label for="file-input" class="custom-file-upload">Load RDL TEMPLATE / FIELDS</label> 
+	<input class="inp" id="file-input" type="file"/>
+	<button class="btn" onclick="createRDL()">Create RDL</button>
+	
+	<a href="https://github.com/Jacek-Kaleta/RDL_maker" target="_blank">
+	on GitHub
+	</a>
+	<!--
+	<input class="inp" type="text" id="searchInput" placeholder="Text to search" size="20">
+	<button class="btn" onclick="search()">Search</button>
+	-->
+	<br/>
+	<br/>
+	<br/>
+	<div id="rdl"></div>
+	
+	<script>
+		const fileInput = document.getElementById('file-input');
+		let rdlText = '' ;
+		let outText = undefined ;
+		let csvText = undefined ;
+		let fields  = [];
+		
+		fileInput.addEventListener('change', function(event) 
+		{
+			const selectedFile = event.target.files[0];
+			loadFile(selectedFile);
+		});
+		
+		function loadFile(file) {
+			let reader = new FileReader();
+			reader.onload = function(event) 
+			{
+				let fileContent = event.target.result;
+				if (file.name.split('.').pop().toLowerCase() =='rdl')
+				{
+					rdlText = fileContent;
+					message('RDL file loaded. Length '+rdlText.length);
+				}
+				else
+				if (file.name.split('.').pop().toLowerCase() =='csv')
+				{
+					csvText = fileContent;
+					loadFields(csvText);
+	
+				} else message('Unknow file type !');
+			};
+			reader.readAsText(file);
+		}
+
+		function clear(msg)
+		{
+			rdl.innerHTML ="" ;
+		}
+		
+		function message(msg)
+		{
+			rdl.innerHTML = rdl.innerHTML+'<br>'+msg ;
+		}
+
+		function loadFields(fileContent)
+		{
+			getFields(fileContent);
+		}
+
+		function getFields(value)
+		{
+			const paste = document.getElementById('fields');
+			fields = value.replace(/\r/g,'').replace(/\t/g,'\n').trim().split('\n');
+			message('Field list loaded. Length '+value.length);
+			message('No of field loaded: '+fields.length);
+			console.log(fields.join('\n'));
+		}
+
+		function createRDL()
+		{
+			clear();
+			console.log(rdlText);
+			if (rdlText == undefined)
+			{
+				message('RDL not loaded !');
+				return ;
+			}
+			if (csvText == undefined)
+			{
+				message('Field list not loaded !');
+				return ;
+			}
+			outText = convertRDL(rdlText);
+			saveToRdlFile(outText);
+			message('File downloaded');
+			return  ;
+			
+			function convertRDL(text)
+			{
+				return procesujTekst(text,'<Tablix ','</Tablix>', generujTekst);
+				
+				function generujTekst(text, n)
+				{
+					if (n==0) return processTablix(text) ;
+					if (n>=1) 
+					{
+						message('Too many Tablix elements in source RDL') ;
+						return text ;
+					}
+				}
+			}
+			
+			function processTablix(text)
+			{
+				text = processTablixColumns(text)
+				text = processTablixRow(text)
+				return text;
+			}
+			
+			function processTablixColumns(text)
+			{
+				return procesujTekst(text,'<TablixColumn>','</TablixColumn>', generujTablixColumn);
+				
+				function generujTablixColumn(text, n)
+				{
+					if (n==0) return generujKolumny(text) ;
+					if (n>0)
+					{
+						message('Too many tablix columns');
+						return text ;
+					}
+					
+					function generujKolumny(text)
+					{
+						let outtext = "";
+						fields.forEach(function(){outtext+=text});
+						return outtext;
+					}
+				}
+			}
+			
+			function processTablixRow(text)
+			{
+				return procesujTekst(text,'<TablixRow>','</TablixRow>', generujTablixRow);
+				
+				function generujTablixRow(text, n)
+				{
+					if (n<=1) return generujWiersze(text, n) ;
+					if (n>1)
+					{
+						message('Too many tablix rows');
+						return text ;
+					}
+					
+					function generujWiersze(text, nw)
+					{
+						return procesujTekst(text,'<TablixCell>','</TablixCell>', generujTablixCell);
+
+						function generujTablixCell(text, n)
+						{
+							if (n==0)
+							{
+								let outtext = "";
+								fields.forEach(function(name){outtext+=generujCell(text,name, nw)})
+								return outtext
+
+								function generujCell(text, name, nw)
+								{
+									if (nw == 0)
+									{
+										text = zamienTekst(text,'<Textbox ','>','<Textbox Name="'+name+'_header">')
+										text = zamienTekst(text,'<Value>','</Value>','<Value>'+name+'</Value>')
+										text = zamienTekst(text,'<rd:DefaultName>','</rd:DefaultName>','<rd:DefaultName>'+name+'_header</rd:DefaultName>')
+									}
+									if (nw == 1)
+									{
+										text = zamienTekst(text,'<Textbox ','>','<Textbox Name="'+name+'">')
+										text = zamienTekst(text,'<Value>','</Value>','<Value>=Fields!'+name+'.Value</Value>')
+										text = zamienTekst(text,'<rd:DefaultName>','</rd:DefaultName>','<rd:DefaultName>'+name+'</rd:DefaultName>')
+									}
+									return text;
+								}
+							}
+							if (n>0)
+							{
+								message('Too many cells');
+								return text
+							}
+						}
+					}
+				}
+			}
+			
+			function saveToRdlFile(text) 
+			{
+				let file = new Blob([text], { type: 'text/plain' });
+				{
+					let a = document.createElement('a');
+					a.href = URL.createObjectURL(file);
+					a.download = 'REPORT.rdl';
+					a.click();
+				}
+			}
+		}
+		
+		function dummy(text,n)
+		{
+			return text ;
+		}
+		
+		function procesujTekst(text, tagPoczatkowy, tagKoncowy, procesTekst) 
+		{
+			let outtext = "" ;
+			let i =0;
+			
+			let pIndex = text.indexOf(tagPoczatkowy);
+			while (pIndex >=0)
+			{
+				outtext += text.substring(0,pIndex);
+				text = text.substring(pIndex);
+				let kIndex = text.indexOf(tagKoncowy);
+				if (kIndex  < 0) break;
+				
+				const srodek =  text.substring(0, kIndex+tagKoncowy.length) ;
+				outtext += procesTekst(srodek, i);
+				i++ ;
+				text = text.substring(kIndex+tagKoncowy.length);
+				pIndex = text.indexOf(tagPoczatkowy)
+			}
+			outtext += text ;
+			text ='';
+			return outtext;
+		}
+		
+		
+		function zamienTekst(tekst, tagPoczatkowy, tagKoncowy, nowyTekst) 
+		{
+			const pIndex = tekst.indexOf(tagPoczatkowy);
+			if (pIndex <0) return tekst ;
+			
+			const poczatek = tekst.substring(0,pIndex);
+			const reszta = tekst.substring(pIndex);
+			const kIndex = reszta.indexOf(tagKoncowy);
+			if (kIndex  < 0) return tekst;
+			return poczatek + nowyTekst + reszta.substring(kIndex+tagKoncowy.length) ;
+		}
+		
+		function pobierzTekst(tekst, tagPoczatkowy, tagKoncowy, nowyTekst) 
+		{
+			const pIndex = tekst.indexOf(tagPoczatkowy);
+			if (pIndex <0) return '' ;
+			
+			const reszta = tekst.substring(pIndex);
+			const kIndex = reszta.indexOf(tagKoncowy);
+			if (kIndex  < 0) return '';
+			return reszta.substring(0, kIndex+tagKoncowy.length);
+		}
+	</script>
+</body>
+</html>
