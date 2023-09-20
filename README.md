@@ -18,10 +18,11 @@ From https://rdlmaker.pages.dev/RDL_maker
 
 The file should have the extension ".csv".
 The definition of the columns is written in the following lines of the file.
+
 The line consists of fields:
 - column header,
 - data field name,
 - field width in cm,
-- description of how to justify text in the result column 9 allowed values are: left, Center, Right)
+- description of how to justify text in the result column (allowed values are: Left, Center, Right)
 - description of formatting method (e.g. dd.mm.yyyy, #.00)
 The fields in a line are linked together using a tab character
