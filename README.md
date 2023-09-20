@@ -25,4 +25,5 @@ The line consists of fields:
 - field width in cm,
 - description of how to justify text in the result column (allowed values are: Left, Center, Right)
 - description of formatting method (e.g. dd.mm.yyyy, #.00)
-The fields in a line are linked together using a tab character
+
+The fields in a line are linked together using a tab character.
