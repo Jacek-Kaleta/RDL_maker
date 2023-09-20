@@ -27,3 +27,5 @@ The line consists of fields:
 - description of formatting method (e.g. dd.mm.yyyy, #.00)
 
 The fields in a line are linked together using a tab character.
+
+See a sample file: [RDL_Sample](https://github.com/Jacek-Kaleta/RDL_maker/blob/main/RDL_Sample.csv)
