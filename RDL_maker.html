@@ -47,7 +47,7 @@
 					message('RDL file loaded. Length '+rdlText.length);
 				}
 				else
-				if (file.name.split('.').pop().toLowerCase() =='csv')
+				if (file.name.split('.').pop().toLowerCase() =='csv' || file.name.split('.').pop().toLowerCase() =='txt')
 				{
 					csvText = fileContent;
 					loadFields(csvText);
@@ -74,29 +74,37 @@
 
 		function getFields(value)
 		{
-			const paste = document.getElementById('fields');
-			fields = value.replace(/\r/g,'').replace(/\t/g,'\n').trim().split('\n');
+			const textarray = value.replace(/\r/g,'').trim().split('\n');
+			fields=[];
+			textarray.forEach(function(element)
+			{
+				const line = element.split("\t");
+				if (line.length == 1 ) fields.push([line[0], line[0], "", "", ""]);
+				if (line.length == 2 ) fields.push([line[0], line[1], "", "", ""])
+				if (line.length == 3 ) fields.push([line[0], line[1], line[2], "", ""])
+				if (line.length == 4 ) fields.push([line[0], line[1], line[2], line[3], ""]);
+				if (line.length == 5 ) fields.push([line[0], line[1], line[2], line[3], line[4]]);
+			});
 			message('Field list loaded. Length '+value.length);
-			message('No of field loaded: '+fields.length);
-			console.log(fields.join('\n'));
+			message('No of field\'s loaded: '+fields.length);
 		}
 
 		function createRDL()
 		{
 			clear();
-			console.log(rdlText);
 			if (rdlText == undefined)
 			{
 				message('RDL not loaded !');
 				return ;
 			}
-			if (csvText == undefined)
+			if (fields.length == undefined)
 			{
 				message('Field list not loaded !');
 				return ;
 			}
 			outText = convertRDL(rdlText);
 			saveToRdlFile(outText);
+			message('Project created');
 			message('File downloaded');
 			return  ;
 			
@@ -138,8 +146,18 @@
 					function generujKolumny(text)
 					{
 						let outtext = "";
-						fields.forEach(function(){outtext+=text});
+						fields.forEach(function(element){outtext+=generujKolumne(element,text)});
 						return outtext;
+
+						function generujKolumne(element, text)
+						{
+							if (element[2].length >0)
+							{
+								const l = element[2].replace("cm","")+"cm";
+								return '<TablixColumn><Width>'+l+'</Width></TablixColumn>';
+							}
+							return text ;
+						}
 					}
 				}
 			}
@@ -173,17 +191,43 @@
 								{
 									if (nw == 0)
 									{
-										text = zamienTekst(text,'<Textbox ','>','<Textbox Name="'+name+'_header">')
-										text = zamienTekst(text,'<Value>','</Value>','<Value>'+name+'</Value>')
-										text = zamienTekst(text,'<rd:DefaultName>','</rd:DefaultName>','<rd:DefaultName>'+name+'_header</rd:DefaultName>')
+										text = zamienTekst(text,'<Textbox ','>','<Textbox Name="'+name[1]+'_header">')
+										text = zamienTekst(text,'<Value>','</Value>','<Value>'+name[0]+'</Value>')
+										text = zamienTekst(text,'<rd:DefaultName>','</rd:DefaultName>','<rd:DefaultName>'+name[1]+'_header</rd:DefaultName>')
 									}
 									if (nw == 1)
 									{
-										text = zamienTekst(text,'<Textbox ','>','<Textbox Name="'+name+'">')
-										text = zamienTekst(text,'<Value>','</Value>','<Value>=Fields!'+name+'.Value</Value>')
-										text = zamienTekst(text,'<rd:DefaultName>','</rd:DefaultName>','<rd:DefaultName>'+name+'</rd:DefaultName>')
+										text = zamienTekst(text,'<Textbox ','>','<Textbox Name="'+name[1]+'">')
+										text = zamienTekst(text,'<Value>','</Value>','<Value>=Fields!'+name[1]+'.Value</Value>')
+										text = zamienTekst(text,'<rd:DefaultName>','</rd:DefaultName>','<rd:DefaultName>'+name[1]+'</rd:DefaultName>');
+										text = zamienTextAlign(text, name[3]);
+										text = zamienFormat(text, name[4]);
 									}
+									
 									return text;
+
+									function zamienTextAlign(text, align)
+									{
+										align = align.toLowerCase();
+										if (align =="left") return zamienTekst(text,'<TextAlign>','</TextAlign>','<TextAlign>Left</TextAlign>');
+										if (align =="l") return zamienTekst(text,'<TextAlign>','</TextAlign>','<TextAlign>Left</TextAlign>');
+										
+										if (align =="right") return zamienTekst(text,'<TextAlign>','</TextAlign>','<TextAlign>Right</TextAlign>');
+										if (align =="r") return zamienTekst(text,'<TextAlign>','</TextAlign>','<TextAlign>Right</TextAlign>');
+										if (align =="p") return zamienTekst(text,'<TextAlign>','</TextAlign>','<TextAlign>Right</TextAlign>');
+
+										if (align =="center") return zamienTekst(text,'<TextAlign>','</TextAlign>','<TextAlign>Center</TextAlign>');
+										if (align =="c") return zamienTekst(text,'<TextAlign>','</TextAlign>','<TextAlign>Center</TextAlign>');
+										if (align =="s") return zamienTekst(text,'<TextAlign>','</TextAlign>','<TextAlign>Center</TextAlign>');
+										return text;
+									}
+
+									function zamienFormat(text, format)
+									{
+										format = format.trim();
+										if (format.length == 0) return zamienTekst(text,'<Format>','</Format>','<Format></Format>');
+										return zamienTekst(text,'<Format>','</Format>','<Format>'+format+'</Format>');
+									}
 								}
 							}
 							if (n>0)
@@ -196,13 +240,25 @@
 				}
 			}
 			
+			function formatujDateNaString(date) 
+			{
+			const rok = date.getFullYear();
+				const miesiac = String(date.getMonth() + 1).padStart(2, '0'); // Dodaj 1, ponieważ miesiące są indeksowane od 0
+				const dzien = String(date.getDate()).padStart(2, '0');
+				const godzina = String(date.getHours()).padStart(2, '0');
+				const minuta = String(date.getMinutes()).padStart(2, '0');
+				const sekunda = String(date.getSeconds()).padStart(2, '0');
+
+				return `${rok}${miesiac}${dzien}_${godzina}${minuta}${sekunda}`
+			}
+
 			function saveToRdlFile(text) 
 			{
 				let file = new Blob([text], { type: 'text/plain' });
 				{
 					let a = document.createElement('a');
 					a.href = URL.createObjectURL(file);
-					a.download = 'REPORT.rdl';
+					a.download = 'REPORT_'+formatujDateNaString(new Date())+'.rdl';
 					a.click();
 				}
 			}
