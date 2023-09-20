@@ -16,7 +16,8 @@ From https://rdlmaker.pages.dev/RDL_maker
 
 **What does a file containing a list of report columns look like?**
 
-The file should have the extension ".csv".
+The file should have the ".csv" or ".txt" extension.
+
 The definition of the columns is written in the following lines of the file.
 
 The line consists of fields:
