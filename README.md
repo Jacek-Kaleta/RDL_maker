@@ -8,8 +8,20 @@ The application processes the template file. The application duplicates the appr
 
 From https://rdlmaker.pages.dev/RDL_maker
 
-You can:
+**How create project from template file**
 
-- load the temapte definition from the ".rdl" file (button **Load RDL TEMPLATE / FIELDS**)
-- load column list from ".csv" file (button **Load RDL TEMPLATE / FIELDS**)
-- save created project (button **Create RDL**)
+- click the button **Load RDL TEMPLATE / FIELDS** and load template from the ".rdl" file
+- click the button **Load RDL TEMPLATE / FIELDS** and load column list from ".csv" file 
+- save project by clicking **Create RDL**
+
+**What does a file containing a list of report columns look like?**
+
+The file should have the extension ".csv".
+The definition of the columns is written in the following lines of the file.
+The line consists of fields:
+- column header,
+- data field name,
+- field width in cm,
+- description of how to justify text in the result column 9 allowed values are: left, Center, Right)
+- description of formatting method (e.g. dd.mm.yyyy, #.00)
+The fields in a line are linked together using a tab character
