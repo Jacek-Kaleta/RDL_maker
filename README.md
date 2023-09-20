@@ -29,7 +29,7 @@ The line consists of fields:
 
 The fields in a line are linked together using a tab character.
 
-See a sample file: [RDL_Sample](https://github.com/Jacek-Kaleta/RDL_maker/blob/main/RDL_Sample.csv)
+See the sample:  [RDL_Sample.csv](https://github.com/Jacek-Kaleta/RDL_maker/blob/main/RDL_Sample.csv)  and  template:[RDL_template.rdl](https://github.com/Jacek-Kaleta/RDL_maker/blob/main/RDL_Template.rdl) files.
 
 **Description of the structure of the RDL file**
 
