@@ -33,6 +33,4 @@ See a sample file: [RDL_Sample](https://github.com/Jacek-Kaleta/RDL_maker/blob/m
 
 **Description of the structure of the RDL file**
 
-See the description on the website:
-
-[MS-RDL Report Definition Language File Format](https://learn.microsoft.com/en-us/openspecs/sql_server_protocols/ms-rdl/53287204-7cd0-4bc9-a5cd-d42a5925dca1)
+See the description on the website: [MS-RDL Report Definition Language File Format](https://learn.microsoft.com/en-us/openspecs/sql_server_protocols/ms-rdl/53287204-7cd0-4bc9-a5cd-d42a5925dca1)
