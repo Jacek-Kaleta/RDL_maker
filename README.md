@@ -37,4 +37,4 @@ See the description on the website: [MS-RDL Report Definition Language File Form
 
 **How to download Microsoft® Report Builder**
 
-See [Microsoft® Report Builder](https://www.microsoft.com/en-us/download/details.aspx?id=53613)
+See [Microsoft® Report Builder](https://www.microsoft.com/en-us/download/details.aspx?id=53613)  and [RDL XML Schemas](https://learn.microsoft.com/en-us/openspecs/sql_server_protocols/ms-rdl/4299384a-e826-4f69-bb06-f56d37155197)
